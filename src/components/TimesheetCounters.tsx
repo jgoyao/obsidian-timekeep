@@ -10,12 +10,23 @@ import {
 	getRunningEntry,
 	getTotalDuration,
 	getEntryDuration,
+	getTotalDurationOnDay,
 } from "@/timekeep";
 
 type TimingState = {
 	running: boolean;
 	current: string;
 	currentShort: string;
+	monday: string;
+	mondayShort: string;
+	tuesday: string;
+	tuesdayShort: string;
+	wednesday: string;
+	wednesdayShort: string;
+	thursday: string;
+	thursdayShort: string;
+	friday: string;
+	fridayShort: string;
 	total: string;
 	totalShort: string;
 };
@@ -29,6 +40,11 @@ type TimingState = {
 function getTimingState(timekeep: Timekeep): TimingState {
 	const currentTime = moment();
 	const total = getTotalDuration(timekeep.entries, currentTime);
+	const monday = getTotalDurationOnDay(timekeep.entries, currentTime,1);
+	const tuesday = getTotalDurationOnDay(timekeep.entries, currentTime,2);
+	const wednesday = getTotalDurationOnDay(timekeep.entries, currentTime,3);
+	const thursday = getTotalDurationOnDay(timekeep.entries, currentTime,4);
+	const friday = getTotalDurationOnDay(timekeep.entries, currentTime,5);
 	const runningEntry = getRunningEntry(timekeep.entries);
 	const current = runningEntry
 		? getEntryDuration(runningEntry, currentTime)
@@ -38,6 +54,16 @@ function getTimingState(timekeep: Timekeep): TimingState {
 		running: runningEntry !== null,
 		current: formatDurationLong(current),
 		currentShort: formatDurationShort(current),
+		monday: formatDurationLong(monday),
+		mondayShort: formatDurationShort(monday),
+		tuesday: formatDurationLong(tuesday),
+		tuesdayShort: formatDurationShort(tuesday),
+		wednesday: formatDurationLong(wednesday),
+		wednesdayShort: formatDurationShort(wednesday),
+		thursday: formatDurationLong(thursday),
+		thursdayShort: formatDurationShort(thursday),
+		friday: formatDurationLong(friday),
+		fridayShort: formatDurationShort(friday),
 		total: formatDurationLong(total),
 		totalShort: formatDurationShort(total),
 	};
@@ -68,29 +94,77 @@ export default function TimesheetCounters() {
 	}, [timekeep]);
 
 	return (
-		<div className="timekeep-timers">
-			{timing.running && (
+		<div>
+			<div className="timekeep-timers">
+				{timing.running  && (
+					<div className="timekeep-timer">
+						<span className="timekeep-timer-value">
+							{timing.current}
+						</span>
+						{settings.showDecimalHours && (
+							<span className="timekeep-timer-value-small">
+								{timing.currentShort}
+							</span>
+						)}
+						<span>Current</span>
+					</div>
+				)}
 				<div className="timekeep-timer">
-					<span className="timekeep-timer-value">
-						{timing.current}
-					</span>
+					<span className="timekeep-timer-value">{timing.totalShort}</span>
 					{settings.showDecimalHours && (
 						<span className="timekeep-timer-value-small">
-							{timing.currentShort}
+							{timing.totalShort}
 						</span>
 					)}
-					<span>Current</span>
+					<span>Total</span>
 				</div>
-			)}
-
+			</div>
+			<div className="timekeep-timers">
 			<div className="timekeep-timer">
-				<span className="timekeep-timer-value">{timing.total}</span>
-				{settings.showDecimalHours && (
-					<span className="timekeep-timer-value-small">
-						{timing.totalShort}
-					</span>
-				)}
-				<span>Total</span>
+					<span className="timekeep-timer-value">{timing.mondayShort}</span>
+					{settings.showDecimalHours && (
+						<span className="timekeep-timer-value-small">
+							{timing.monday}
+						</span>
+					)}
+					<span>Mon</span>
+				</div>
+				<div className="timekeep-timer">
+					<span className="timekeep-timer-value">{timing.tuesdayShort}</span>
+					{settings.showDecimalHours && (
+						<span className="timekeep-timer-value-small">
+							{timing.tuesday}
+						</span>
+					)}
+					<span>Tue</span>
+				</div>
+				<div className="timekeep-timer">
+					<span className="timekeep-timer-value">{timing.wednesdayShort}</span>
+					{settings.showDecimalHours && (
+						<span className="timekeep-timer-value-small">
+							{timing.wednesday}
+						</span>
+					)}
+					<span>Wed</span>
+				</div>
+				<div className="timekeep-timer">
+					<span className="timekeep-timer-value">{timing.thursdayShort}</span>
+					{settings.showDecimalHours && (
+						<span className="timekeep-timer-value-small">
+							{timing.thursday}
+						</span>
+					)}
+					<span>Thu</span>
+				</div>
+				<div className="timekeep-timer">
+					<span className="timekeep-timer-value">{timing.fridayShort}</span>
+					{settings.showDecimalHours && (
+						<span className="timekeep-timer-value-small">
+							{timing.friday}
+						</span>
+					)}
+					<span>Fri</span>
+				</div>
 			</div>
 		</div>
 	);

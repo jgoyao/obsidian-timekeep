@@ -6,6 +6,8 @@ import { useSettings } from "@/contexts/use-settings-context";
 import { useTimekeepStore } from "@/contexts/use-timekeep-store";
 import {
 	withEntry,
+	createEmptyEntry,
+	makeGroupEntry,
 	isKeepRunning,
 	getRunningEntry,
 	stopRunningEntries,
@@ -49,6 +51,33 @@ export default function TimekeepStart() {
 			/// Clear the name input
 			setName("");
 			entries = withEntry(entries, name, currentTime);
+
+			return {
+				...timekeep,
+				entries,
+			};
+		});
+	};
+
+	const onAdd = (event: FormEvent) => {
+		// Prevent form submission from reloading Obsidian
+		event.preventDefault();
+		event.stopPropagation();
+
+		store.setState((timekeep) => {
+			const currentTime = moment();
+			let entries = timekeep.entries;
+
+			// Stop any already running entries
+			if (isKeepRunning(timekeep)) {
+				// Stop the running entry
+				entries = stopRunningEntries(entries, currentTime);
+			}
+
+			/// Clear the name input
+			setName("");
+			const newEntrie = createEmptyEntry(name);
+			entries = [...entries,makeGroupEntry(newEntrie)]
 
 			return {
 				...timekeep,
@@ -114,7 +143,7 @@ export default function TimekeepStart() {
 			<form
 				className="timekeep-start-area"
 				data-area="start"
-				onSubmitCapture={onStart}>
+				onSubmitCapture={onAdd}>
 				<div className="timekeep-name-wrapper">
 					<label htmlFor="timekeepBlockName">
 						Block Name:
@@ -141,7 +170,7 @@ export default function TimekeepStart() {
 					type="submit"
 					title={isTimekeepRunning ? "Stop and start" : "Start"}
 					className="timekeep-start">
-					<ObsidianIcon icon="play" className="button-icon" />
+					<ObsidianIcon icon="plus" className="button-icon" />
 				</button>
 			</form>
 		</div>

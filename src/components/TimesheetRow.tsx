@@ -8,7 +8,9 @@ import TimesheetRowDuration from "@/components/TimesheetRowDuration";
 import {
 	updateEntry,
 	createEntry,
+	createEmptyEntry,
 	withSubEntry,
+	removeEntry,
 	isKeepRunning,
 	isEntryRunning,
 	setEntryCollapsed,
@@ -38,7 +40,6 @@ export default function TimesheetRow({ entry, indent }: Props) {
 	const onClickStart = () => {
 		timekeepStore.setState((timekeep) => {
 			const currentTime = moment();
-
 			let entries = timekeep.entries;
 
 			// Stop any already running entries
@@ -47,6 +48,57 @@ export default function TimesheetRow({ entry, indent }: Props) {
 				entries = stopRunningEntries(entries, currentTime);
 			}
 
+			/*if (entry.subEntries !== null || entry.startTime !== null) {
+				// If the entry has been started or is a group create a new child entry
+				entries = updateEntry(
+					entries,
+					entry,
+					withSubEntry(entry, "", currentTime)
+				);
+			} else {*/
+				// If the entry hasn't been started then start it
+				entries = updateEntry(
+					entries,
+					entry,
+					createEntry(entry.name, currentTime)
+				);
+			//}
+
+			return {
+				...timekeep,
+				entries,
+			};
+		});
+	};
+
+	const onClickStop = () => {
+		timekeepStore.setState((timekeep) => {
+			const currentTime = moment();
+			let entries = timekeep.entries;
+
+			// Stop any already running entries
+			if (isKeepRunning(timekeep)) {
+				// Stop the running entry
+				entries = stopRunningEntries(entries, currentTime);
+			}
+
+			return {
+				...timekeep,
+				entries,
+			};
+		});
+	};
+
+	const onClickAdd = () => {
+		timekeepStore.setState((timekeep) => {
+			const currentTime = moment();
+			let entries = timekeep.entries;
+			// Stop any already running entries
+			/*if (isKeepRunning(timekeep)) {
+				// Stop the running entry
+				entries = stopRunningEntries(entries, currentTime);
+			}*/
+
 			if (entry.subEntries !== null || entry.startTime !== null) {
 				// If the entry has been started or is a group create a new child entry
 				entries = updateEntry(
@@ -54,12 +106,13 @@ export default function TimesheetRow({ entry, indent }: Props) {
 					entry,
 					withSubEntry(entry, "", currentTime)
 				);
-			} else {
+			}
+			else {
 				// If the entry hasn't been started then start it
 				entries = updateEntry(
 					entries,
 					entry,
-					createEntry(entry.name, currentTime)
+					createEmptyEntry(entry.name)
 				);
 			}
 
@@ -69,6 +122,12 @@ export default function TimesheetRow({ entry, indent }: Props) {
 			};
 		});
 	};
+
+		const onClickDelete = async () => {
+			timekeepStore.setState((timekeep) => ({
+				entries: removeEntry(timekeep.entries, entry),
+			}));
+		};
 
 	// Handles toggling the collapsed state for an entry
 	const handleToggleCollapsed = () => {
@@ -133,13 +192,27 @@ export default function TimesheetRow({ entry, indent }: Props) {
 			</td>
 			<td className="timekeep-col timekeep-col--actions">
 				<div className="timekeep-actions-wrapper">
-					<button onClick={onClickStart} className="timekeep-action">
-						<ObsidianIcon icon="play" className="button-icon" />
+					<button onClick={onClickAdd} className="timekeep-action">
+						<ObsidianIcon icon="plus" className="button-icon" />
 					</button>
+					{!isSelfRunning && entry.subEntries == null &&  <button onClick={onClickStart} className="timekeep-action">
+						<ObsidianIcon icon="play" className="button-icon" />
+					</button>}
+					{!isSelfRunning && entry.subEntries != null &&  <button className="timekeep-action">
+						<ObsidianIcon icon="slash" className="button-icon" />
+					</button>}
+					{isSelfRunning && <button onClick={onClickStop} className="timekeep-action">
+						<ObsidianIcon icon="stop-circle" className="button-icon" />
+					</button>}
 					<button
 						onClick={() => setEditing(true)}
 						className="timekeep-action">
 						<ObsidianIcon icon="edit" className="button-icon" />
+					</button>
+					<button
+						onClick={onClickDelete}
+						className="timekeep-action">
+						<ObsidianIcon icon="trash-2" className="button-icon" />
 					</button>
 				</div>
 			</td>

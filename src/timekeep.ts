@@ -143,7 +143,24 @@ export function createEntry(name: string, startTime: Moment): TimeEntry {
 	return {
 		id: uuid(),
 		name,
-		startTime,
+		startTime: startTime,
+		endTime: null,
+		subEntries: null,
+	};
+}
+
+/**
+ * Creates a new entry that has just started
+ *
+ * @param name The name for the entry
+ * @param startTime The start time for the entry
+ * @returns The created entry
+ */
+export function createEmptyEntry(name: string): TimeEntry {
+	return {
+		id: uuid(),
+		name,
+		startTime: null,
 		endTime: null,
 		subEntries: null,
 	};
@@ -326,7 +343,7 @@ function collapseEntry(target: TimeEntry): TimeEntry {
  * @param entry The entry to create a group from
  * @returns The group entry
  */
-function makeGroupEntry(entry: TimeEntry): TimeEntryGroup {
+export function makeGroupEntry(entry: TimeEntry): TimeEntryGroup {
 	if (entry.subEntries !== null) return entry;
 
 	return {
@@ -381,7 +398,8 @@ export function withSubEntry(
 		name = `Part ${groupEntry.subEntries.length + 1}`;
 	}
 
-	const newEntry = createEntry(name, startTime);
+	//const newEntry = createEntry(name, startTime);
+	const newEntry = createEmptyEntry(name);
 
 	return {
 		...groupEntry,
@@ -482,6 +500,35 @@ export function getTotalDuration(
 			totalDuration + getEntryDuration(entry, currentTime),
 		0
 	);
+}
+
+/**
+ * Gets the total duration of all the provided entries
+ * that fall on a specified day in milliseconds, including subentries
+ *
+ * @param entries The entries
+ * @param currentTime The current time to use for unfinished entries
+ * @param dayNumber The day of the week (0 for Sunday, 1 for Monday, etc.)
+ * @returns The total duration in milliseconds for entries on the specified day
+ */
+export function getTotalDurationOnDay(
+	entries: TimeEntry[],
+	currentTime: Moment,
+	dayNumber: number
+): number {
+	return entries.reduce((totalDuration, entry) => {
+		// Check if the entry's start time is on the specified day
+		if (entry.startTime && entry.startTime.day() === dayNumber) {
+			totalDuration += getEntryDuration(entry, currentTime);
+		}
+
+		// If the entry has subentries, recursively calculate their duration
+		if (entry.subEntries !== null) {
+			totalDuration += getTotalDurationOnDay(entry.subEntries, currentTime, dayNumber);
+		}
+
+		return totalDuration;
+	}, 0);
 }
 
 /**
