@@ -104,7 +104,7 @@ export default function TimekeepStart() {
 	return (
 		<div>
 			{/* Currently running entry */}
-			{currentEntry !== null && currentEntry.startTime !== null && (
+			{/*currentEntry !== null && currentEntry.startTime !== null && (
 				<form
 					className="timekeep-start-area"
 					data-area="running"
@@ -137,7 +137,7 @@ export default function TimekeepStart() {
 						/>
 					</button>
 				</form>
-			)}
+			)*/}
 
 			{/* Start new entry */}
 			<form
