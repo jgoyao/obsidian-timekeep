@@ -1,5 +1,10 @@
 ## ⌛ Obsidian Timekeep
 
+![Compile]
+```sh
+ npm run build && mv ./dist/* . && cp main.js /mnt/c/Users/60158/OneDrive\ -\ CAF/00-Gestion/Obsidian/CAF/.obsidian/plugins/timekeep/
+```
+
 > Obsidian plugin for time tracking
 
 ![License](https://img.shields.io/github/license/jacobtread/obsidian-timekeep?style=for-the-badge)
